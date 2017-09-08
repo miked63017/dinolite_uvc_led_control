@@ -1,0 +1,131 @@
+5MP Model:
+
+AE off: uvcdynctrl -S 4:2 05070003357810
+AE on: uvcdynctrl -S 4:2 05000003357810
+
+AE off, exposure times
+1000th: uvcdynctrl -S 4:2 05000001357810
+500th: uvcdynctrl -S 4:2 05010001357810
+250th: uvcdynctrl -S 4:2 05020001357810
+one hundred twenty fifth: uvcdynctrl -S 4:2 05040001357810
+sixtieth: uvcdynctrl -S 4:2 05080001357810
+thirtieth: uvcdynctrl -S 4:2 05100001357810
+fifteenth: uvcdynctrl -S 4:2 0500000d387810
+eighth: uvcdynctrl -S 4:2 051f0001357810
+(eighth->)quarter: uvcdynctrl -S 4:2 0508000c387810
+(quarter->)half: uvcdynctrl -S 4:2 053e0001357810
+(half->)one: uvcdynctrl -S 4:2 05510035307810
+(one->)two: uvcdynctrl -S 4:2 050d000c387810
+(two->)four: uvcdynctrl -S 4:2 05610035307810
+(four->)eight: uvcdynctrl -S 4:2 050f000c387810
+(eight->)sixteen: uvcdynctrl -S 4:2 0510000c387810
+
+AE On, Luma values
+2-205, hex places 3 and 4, convert 2-205 to hex and populate
+Luma 40: uvcdynctrl -S 4:2 05->28<-001e3a7810 0x28 == 40
+luma 39: uvcdynctrl -S 4:2 0527001e3a7810
+luma 38: uvcdynctrl -S 4:2 0526001e3a7810
+luma 37: uvcdynctrl -S 4:2 0525001e3a7810
+
+
+LED off: uvcdynctrl -S 4:2 f2000000000000
+LED on: uvcdynctrl -S 4:2 f2010000000000
+
+FLC off: uvcdynctrl -S 4:2 f3000000000000
+FLC on: uvcdynctrl -S 4:2 f3010000000000
+
+
+FLC Control:
+Logical and(& in python) of individual off codes to build group off commands
+all on an all off are the exception
+
+Pass list, logical and all of them, if list greater than length 3 turn off all, less than 1 turn on all
+
+1 2
+4 3
+
+01 == #2 and #3 and #4 off
+02 == #1 and #3 and #4 off
+03 == #3 and #4 off
+04 == #1 and #2 and #4 off
+05 == #2 and #4 off
+06 == #1 and #4 off
+07 == #4 off
+08 == #1 and #2 and #3 off
+09 == #2 and #3 off
+0a == #1 and #3 off
+0b == #3 off
+0c == #1 and #2 off
+0d == #2 off
+0e == #1 off
+0f == all on
+10 == #1 and #2 and #3 and #4 off
+
+Stripped down python example:
+```
+  self._led1 = 0x0e
+  self._led2 = 0x0d
+  self._led3 = 0x0b
+  self._led4 = 0x07
+
+  def _build_flc_hex_string(self,list_of_lights_to_turn_off):
+      if len(list_of_lights_to_turn_off) > 3:
+          return "05100004006200"
+      elif len(list_of_lights_to_turn_off) < 1:
+          return "050f0004006200"
+      else:
+          flc_hex = None
+          for hex_piece in list_of_lights_to_turn_off:
+              if flc_hex is None:
+                  flc_hex = hex_piece
+              else:
+                  flc_hex = flc_hex & hex_piece
+          baseString = "05" + format(flc_hex, '02x') + "0004006200"
+          return baseString
+
+subprocess.call(["uvcdynctrl", "-S", "4:2", self._build_flc_hex_string([self._led1, self._led2])])
+```
+
+Brightness control of FLC LEDs
+Dino software sends each code twice so I am just doing the same thing here
+
+Brightness can be 0-6
+code = "050" + str(self._flc_led_brightness) + "0003006200"
+subprocess.call(["uvcdynctrl", "-S", "4:2", code])
+subprocess.call(["uvcdynctrl", "-S", "4:2", code])
+
+When going from 1->0
+uvcdynctrl -S 4:2 05000003006200
+uvcdynctrl -S 4:2 05100004006200
+uvcdynctrl -S 4:2 05000003006200
+uvcdynctrl -S 4:2 05100004006200
+
+When going from 0-> any number this must be sent once before the number
+uvcdynctrl -S 4:2 050f0004006200
+^^ Also useful for when camera comes on but lights are off? Usually means FLC is on, and for some reason it turned off all leds
+Followed by whatever number you want to set brightness to:
+uvcdynctrl -S 4:2 05020003006200
+uvcdynctrl -S 4:2 05020003006200
+
+1.2MP model below here
+
+LEDS for older model, need kernel patch
+off: uvcdynctrl -S 4:3 8001f0
+on: uvcdynctrl -S 4:3 8001f1
+
+AE need my kernel patch
+on 4:5 4803010380ff
+off 4:5 4803010380fe
+
+1000th: uvcdynctrl -S 4:5 480301001609
+500th: uvcdynctrl -S 4:5 480301001612
+250th: uvcdynctrl -S 4:5 480301001623
+one hundred twenty fifth: uvcdynctrl -S 4:5 480301001647
+#Not sure why, but the 60th we need to issue 2 commands, I think one would work but it would be different if you were increasing or decreasing, easier to just run 2
+sixtieth: uvcdynctrl -S 4:5 480301001500;uvcdynctrl -S 4:5 480301001694
+thirtieth: uvcdynctrl -S 4:5 480301001501
+fifteenth: uvcdynctrl -S 4:5 480301001502
+eighth: uvcdynctrl -S 4:5 480301001504
+(eighth->)quarter: uvcdynctrl -S 4:5 480301001508
+(quarter->)half: uvcdynctrl -S 4:5 480301001511
+(half->)one: uvcdynctrl -S 4:5 480301001522
