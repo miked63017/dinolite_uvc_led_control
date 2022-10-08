@@ -1,21 +1,23 @@
-import sys, re, subprocess
+import sys
+import re
+import subprocess
 import pprint
-import time
 import glob
-#import pdb
+
 
 class DinoLiteUVCControl:
     def __init__(self, args):
         self.args = args
         if self.args.debug:
             self.pp = pprint.PrettyPrinter(indent=4)
-        device_re = re.compile("Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)$", re.I)
-        df = subprocess.check_output("lsusb")
+        device_re = re.compile(r"Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)$", re.I)
+        df = subprocess.check_output("lsusb", universal_newlines=True)
         devices = []
         for i in df.split('\n'):
             if i:
                 info = device_re.match(i)
                 if info:
+                    print(i)
                     dinfo = info.groupdict()
                     dinfo['device'] = '/dev/bus/usb/%s/%s' % (dinfo.pop('bus'), dinfo.pop('device'))
                     devices.append(dinfo)
@@ -23,17 +25,18 @@ class DinoLiteUVCControl:
         for device in devices:
             if "a168" in device['id']:
                 idlist = device['id'].split(":")
+                print(idlist)
                 if "0980" in idlist[1]:
                     self.log("Found AnMo device 0980")
-                    #initialize 0980, 5mp shiny microscope
-                    from devices import device0980
+                    # initialize 0980, 5mp shiny microscope
+                    from .devices import device0980
                     tmpObj = device0980.Device0980(self)
                     self.ourDevices.append(tmpObj)
                 if "0890" in idlist[1]:
                     self.log("Found AnMo device 0890")
-                    #initialize 0890, 1.xMP flat color microscope
-                    #This one needs the kernel patch for LED control to work, and no FLC control
-                    from devices import device0890
+                    # initialize 0890, 1.xMP flat color microscope
+                    # This one needs the kernel patch for LED control to work, and no FLC control
+                    from .devices import device0890
                     tmpObj = device0890.Device0890(self)
                     self.ourDevices.append(tmpObj)
         self.log("Devices:")
@@ -54,9 +57,8 @@ class DinoLiteUVCControl:
                             device._set_vid_address(vid)
             self.log(self.ourDevices[0].vid_address)
             self.log(self.ourDevices[1].vid_address)
-        #pdb.set_trace()
 
-    def log(self,data):
+    def log(self, data):
         if self.args.debug:
             self.pp.pprint(data)
 
@@ -67,5 +69,5 @@ class DinoLiteUVCControl:
         pass
 
     def display_shutdown_message(self, returncode):
-        print "Exited with %s exitcode!" % str(returncode)
+        print("Exited with %s exitcode!" % str(returncode))
         sys.exit(int(returncode))

@@ -5,14 +5,15 @@ import os
 from setuptools import setup
 from setuptools import find_packages
 
+
 def get_requirements():
     dirname = os.path.dirname(__file__)
     try:
         with open(os.path.join(dirname, 'requirements.txt'), 'r') as f:
             lines = f.readlines()
-        return map(lambda x: x.replace('\n', ''), lines)
+        return [x.replace('\n', '') for x in lines]
     except IOError:
-        print 'What happened to your requirements.txt file?!?'
+        print('What happened to your requirements.txt file?!?')
         exit(1)
 
 
