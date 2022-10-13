@@ -26,7 +26,7 @@ class Device0980:
                                          ('8s', "050f000c387810"),
                                          ('16s', "0510000c387810")])
         self._ae_default_key = 7
-        self._ae_default_value = self._ae_settings.items()[self._ae_default_key][0]
+        self._ae_default_value = list(self._ae_settings.items())[self._ae_default_key][0]
         self._current_exposure_key = self._ae_default_key
         self._ae_status = "off"
         self.toggle_auto_exposure()
@@ -51,7 +51,7 @@ class Device0980:
 
     def list_standard_controls(self):
         for control in self.controls:
-            print control["Name"]
+            print(control["Name"])
 
     def validate_control_name(self,control):
         valid_control = False
@@ -72,14 +72,14 @@ class Device0980:
         if self.validate_control_name(control) and self.validate_control_value(control,value):
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-s", control, "--", str(value)])
         else:
-            print "Passed bad name or value to uvcdynctrl"
+            print("Passed bad name or value to uvcdynctrl")
 
     def get_standard_control_value(self,control):
         if self.validate_control_name(control):
             current_value = subprocess.check_output(["uvcdynctrl", "-d", self.vid_address, "-g", control])
             return current_value.rstrip()
         else:
-            print "Passed bad name or value to uvcdynctrl"
+            print("Passed bad name or value to uvcdynctrl")
             return "Failed!"
 
     def _set_sane_defaults(self):
@@ -123,7 +123,7 @@ class Device0980:
     def led_dim(self):
         #dim
         if self._flc_status == "off":
-            print "FLC must be on to dim LEDs!"
+            print("FLC must be on to dim LEDs!")
             return
         if self._flc_led_brightness == 0:
             #as dim as it gets
@@ -135,19 +135,19 @@ class Device0980:
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", "05100004006200"])
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", "05000003006200"])
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", "05100004006200"])
-            print "LED 0 Brightness"
+            print("LED 0 Brightness")
         else:
             self._flc_led_brightness -= 1
             #for some reason these get called twice by dino lite software
             code = "050" + str(self._flc_led_brightness) + "0003006200"
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
-            print "LED " + str(self._flc_led_brightness) + " Brightness"
+            print("LED " + str(self._flc_led_brightness) + " Brightness")
 
     def led_brighten(self):
         #brighten
         if self._flc_status == "off":
-            print "FLC must be on to brighten LEDs!"
+            print("FLC must be on to brighten LEDs!")
             return
         if self._flc_led_brightness == 6:
             #as bright as it gets
@@ -159,14 +159,14 @@ class Device0980:
             code = "050" + str(self._flc_led_brightness) + "0003006200"
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
-            print "LED " + str(self._flc_led_brightness) + " Brightness"
+            print("LED " + str(self._flc_led_brightness) + " Brightness")
         else:
             self._flc_led_brightness += 1
             #for some reason these get called twice by dino lite software
             code = "050" + str(self._flc_led_brightness) + "0003006200"
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", code])
-            print "LED " + str(self._flc_led_brightness) + " Brightness"
+            print("LED " + str(self._flc_led_brightness) + " Brightness")
 
     def led_on(self):
         #leds on
@@ -175,7 +175,7 @@ class Device0980:
     def toggle_led_1(self):
         #led 1 on
         if self._flc_status == "off":
-            print "FLC must be on to toggle LED 1!"
+            print("FLC must be on to toggle LED 1!")
             return
         if self._led1 in self._listOfLights:
             newList = list()
@@ -185,16 +185,16 @@ class Device0980:
                 else:
                     newList.append(light)
             self._listOfLights = newList
-            print "LED 1 On"
+            print("LED 1 On")
         else:
             self._listOfLights.append(self._led1)
-            print "LED 1 Off"
+            print("LED 1 Off")
         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._build_flc_hex_string(self._listOfLights)])
 
     def toggle_led_2(self):
         #led 2 on
         if self._flc_status == "off":
-            print "FLC must be on to toggle LED 2!"
+            print("FLC must be on to toggle LED 2!")
             return
         if self._led2 in self._listOfLights:
             newList = list()
@@ -204,16 +204,16 @@ class Device0980:
                 else:
                     newList.append(light)
             self._listOfLights = newList
-            print "LED 2 On"
+            print("LED 2 On")
         else:
             self._listOfLights.append(self._led2)
-            print "LED 2 Off"
+            print("LED 2 Off")
         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._build_flc_hex_string(self._listOfLights)])
 
     def toggle_led_3(self):
         #led 3 on
         if self._flc_status == "off":
-            print "FLC must be on to toggle LED 3!"
+            print("FLC must be on to toggle LED 3!")
             return
         if self._led3 in self._listOfLights:
             newList = list()
@@ -223,16 +223,16 @@ class Device0980:
                 else:
                     newList.append(light)
             self._listOfLights = newList
-            print "LED 3 On"
+            print("LED 3 On")
         else:
             self._listOfLights.append(self._led3)
-            print "LED 3 Off"
+            print("LED 3 Off")
         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._build_flc_hex_string(self._listOfLights)])
 
     def toggle_led_4(self):
         #led 4 on
         if self._flc_status == "off":
-            print "FLC must be on to toggle LED 4!"
+            print("FLC must be on to toggle LED 4!")
             return
         if self._led4 in self._listOfLights:
             newList = list()
@@ -242,10 +242,10 @@ class Device0980:
                 else:
                     newList.append(light)
             self._listOfLights = newList
-            print "LED 4 On"
+            print("LED 4 On")
         else:
             self._listOfLights.append(self._led4)
-            print "LED 4 Off"
+            print("LED 4 Off")
         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._build_flc_hex_string(self._listOfLights)])
 
     def led_off(self):
@@ -258,18 +258,18 @@ class Device0980:
             #uvcdynctrl -S 4:2 05070003357810
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", "05070003357810"])
             self._ae_status = "off"
-            print "AE off"
+            print("AE off")
             time.sleep(2)
-            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._ae_settings.items()[self._ae_default_key][1]])
-            print "Exposure Time: " + self._ae_settings.items()[self._ae_default_key][0]
+            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", list(self._ae_settings.items())[self._ae_default_key][1]])
+            print("Exposure Time: " + list(self._ae_settings.items())[self._ae_default_key][0])
             self._current_exposure_key = self._ae_default_key
         elif self._ae_status == "off":
             #turn AE on
             #uvcdynctrl -S 4:2 05000003357810
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", "05000003357810"])
-            print "AE on"
+            print("AE on")
             #set to 1/8second exposure time, or whatever we choose as self._ae_default_key
-            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._ae_settings.items()[self._ae_default_key][1]])
+            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", list(self._ae_settings.items())[self._ae_default_key][1]])
             self._current_exposure_key = self._ae_default_key
             self._ae_status = "on"
         else:
@@ -284,17 +284,17 @@ class Device0980:
 
     def _change_exposure_time(self, in_or_de):
         if self._ae_status == "on":
-            print "AE must be off to change exposure time!"
+            print("AE must be off to change exposure time!")
             return
         if in_or_de == "increase":
             #increase exposure time
-            if len(self._ae_settings.items()) == self._current_exposure_key + 1:
+            if len(list(self._ae_settings.items())) == self._current_exposure_key + 1:
                 #we have hit the max here, do nothing
                 pass
             else:
                 self._current_exposure_key = self._current_exposure_key + 1
-                subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._ae_settings.items()[self._current_exposure_key][1]])
-            print "Exposure Time: " + self._ae_settings.items()[self._current_exposure_key][0]
+                subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", list(self._ae_settings.items())[self._current_exposure_key][1]])
+            print("Exposure Time: " + list(self._ae_settings.items())[self._current_exposure_key][0])
         elif in_or_de == "decrease":
             #decrease exposure time
             if self._current_exposure_key == 0:
@@ -302,8 +302,8 @@ class Device0980:
                 pass
             else:
                 self._current_exposure_key = self._current_exposure_key - 1
-                subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", self._ae_settings.items()[self._current_exposure_key][1]])
-            print "Exposure Time: " + self._ae_settings.items()[self._current_exposure_key][0]
+                subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:2", list(self._ae_settings.items())[self._current_exposure_key][1]])
+            print("Exposure Time: " + list(self._ae_settings.items())[self._current_exposure_key][0])
         else:
             #IDK what to do here or why we ended up here, pass
             pass

@@ -23,7 +23,7 @@ class Device0890:
                                          ('1s', "480301001522")])
         self.led_on()
         self._ae_default_key = 7
-        self._ae_default_value = self._ae_settings.items()[self._ae_default_key][0]
+        self._ae_default_value = list(self._ae_settings.items())[self._ae_default_key][0]
         self._current_exposure_key = self._ae_default_key
         self._ae_status = "off"
         self.toggle_auto_exposure()
@@ -37,7 +37,7 @@ class Device0890:
 
     def list_standard_controls(self):
         for control in self.controls:
-            print control["Name"]
+            print(control["Name"])
 
     def validate_control_name(self,control):
         valid_control = False
@@ -58,14 +58,14 @@ class Device0890:
         if validate_control_name(control) and validate_control_value(control,value):
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-s", control, "--", str(value)])
         else:
-            print "Passed bad name or value to uvcdynctrl"
+            print("Passed bad name or value to uvcdynctrl")
 
     def get_standard_control_value(self,control):
         if validate_control_name(control):
             current_value = subprocess.check_output(["uvcdynctrl", "-d", self.vid_address, "-g", control])
             return current_value.rstrip()
         else:
-            print "Passed bad name or value to uvcdynctrl"
+            print("Passed bad name or value to uvcdynctrl")
             return "Failed!"
 
     def _set_sane_defaults(self):
@@ -109,17 +109,17 @@ class Device0890:
             #uvcdynctrl -S 4:2 05070003357810
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", "4803010380fe"])
             self._ae_status = "off"
-            print "AE off"
+            print("AE off")
             time.sleep(2)
-            print "Exposure Time: " + self._ae_settings.items()[self._ae_default_key][0]
+            print("Exposure Time: " + list(self._ae_settings.items())[self._ae_default_key][0])
             self._current_exposure_key = self._ae_default_key
         elif self._ae_status == "off":
             #turn AE on
             #uvcdynctrl -S 4:2 05000003357810
             subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", "4803010380ff"])
-            print "AE on"
+            print("AE on")
             #set to 1/8second exposure time, or whatever we choose as self._ae_default_key
-            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", self._ae_settings.items()[self._ae_default_key][1]])
+            subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", list(self._ae_settings.items())[self._ae_default_key][1]])
             self._ae_status = "on"
         else:
             #if its not on or off then somethng is messed up, lets turn it on anyway to fix the next try
@@ -133,23 +133,23 @@ class Device0890:
 
     def _change_exposure_time(self, in_or_de):
         if self._ae_status == "on":
-            print "AE must be off to change exposure time!"
+            print("AE must be off to change exposure time!")
             return
         if in_or_de == "increase":
             #increase exposure time
-            if len(self._ae_settings.items()) == self._current_exposure_key + 1:
+            if len(list(self._ae_settings.items())) == self._current_exposure_key + 1:
                 #we have hit the max here, do nothing
                 pass
             else:
                 self._current_exposure_key = self._current_exposure_key + 1
-                if "1/60s" in self._ae_settings.items()[self._current_exposure_key][0]:
+                if "1/60s" in list(self._ae_settings.items())[self._current_exposure_key][0]:
                     #split because we need two commands for 1/60
-                    uvc_codes = self._ae_settings.items()[self._current_exposure_key][1].split(",")
+                    uvc_codes = list(self._ae_settings.items())[self._current_exposure_key][1].split(",")
                     for code in uvc_codes:
                         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", code])
                 else:
-                    subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", self._ae_settings.items()[self._current_exposure_key][1]])
-            print "Exposure Time: " + self._ae_settings.items()[self._current_exposure_key][0]
+                    subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", list(self._ae_settings.items())[self._current_exposure_key][1]])
+            print("Exposure Time: " + list(self._ae_settings.items())[self._current_exposure_key][0])
         elif in_or_de == "decrease":
             #decrease exposure time
             if self._current_exposure_key == 0:
@@ -157,14 +157,14 @@ class Device0890:
                 pass
             else:
                 self._current_exposure_key = self._current_exposure_key - 1
-                if "1/60s" in self._ae_settings.items()[self._current_exposure_key][0]:
+                if "1/60s" in list(self._ae_settings.items())[self._current_exposure_key][0]:
                     #split because we need two commands for 1/60
-                    uvc_codes = self._ae_settings.items()[self._current_exposure_key][1].split(",")
+                    uvc_codes = list(self._ae_settings.items())[self._current_exposure_key][1].split(",")
                     for code in uvc_codes:
                         subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", code])
                 else:
-                    subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", self._ae_settings.items()[self._current_exposure_key][1]])
-            print "Exposure Time: " + self._ae_settings.items()[self._current_exposure_key][0]
+                    subprocess.call(["uvcdynctrl", "-d", self.vid_address, "-S", "4:5", list(self._ae_settings.items())[self._current_exposure_key][1]])
+            print("Exposure Time: " + list(self._ae_settings.items())[self._current_exposure_key][0])
         else:
             #IDK what to do here or why we ended up here, pass
             pass

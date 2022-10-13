@@ -1,2 +1,2 @@
 from . import dinoliteuvccontrol
-from dinoliteuvccontrol import DinoLiteUVCControl
+from .dinoliteuvccontrol import DinoLiteUVCControl
